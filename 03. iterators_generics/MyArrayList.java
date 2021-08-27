@@ -1,5 +1,6 @@
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class MyArrayList<E> implements Iterable<E> {
 
@@ -24,7 +25,10 @@ public class MyArrayList<E> implements Iterable<E> {
         if (item == null) {
             throw new java.util.NoSuchElementException();
         }
-        addChecker(item);
+        if (size >= ary.length) {
+            expand();
+        }
+        ary[size++] = item;
     }
 
     // add the item at the specified index
@@ -35,26 +39,28 @@ public class MyArrayList<E> implements Iterable<E> {
         if (item == null) {
             throw new java.util.NoSuchElementException();
         }
-        if (index >= size) {
+        if (index >= size || index < 0) {
             throw new IndexOutOfBoundsException();
         }
-        addChecker(item);
-    }
 
-    private void addChecker(E item) {
-        if (size != ary.length) {
-            ary[size++] = item;
-        } else {
-            resize();
-            ary[size++] = item;
+        if (size >= ary.length) {
+            expand();
         }
-    }
-
-    private void resize() {
-        E[] ary = (E[]) new Object[this.ary.length * 2];
-        for (int i = 0; i < this.ary.length; i++) {
+        size++;
+        E[] ary = (E[]) new Object[this.ary.length];
+        for (int i = 0; i < index; i++) {
             ary[i] = this.ary[i];
         }
+        ary[index] = item;
+        for (int i = index; i < size; i++) {
+            ary[i + 1] = this.ary[i];
+        }
+        this.ary = ary;
+    }
+
+    private void expand() {
+        E[] ary = (E[]) new Object[this.ary.length * 2];
+        System.arraycopy(this.ary, 0, ary, 0, this.ary.length);
         this.ary = ary;
     }
 
@@ -62,10 +68,30 @@ public class MyArrayList<E> implements Iterable<E> {
     // throw an IndexOutOfBounds exception if the index is invalid
     public E remove(int index) {
         // todo
+
+        E item = ary[index];
+
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
-        return null;
+        if (size-- <= ary.length / 4) {
+            reduce();
+        }
+        E[] ary = (E[]) new Object[this.ary.length];
+        for (int i = 0; i < index; i++) {
+            ary[i] = this.ary[i];
+        }
+        for (int i = index; i < ary.length - 1; i++) {
+            ary[i] = this.ary[i + 1];
+        }
+        this.ary = ary;
+        return item;
+    }
+
+    private void reduce() {
+        E[] ary = (E[]) new Object[this.ary.length / 2];
+        System.arraycopy(this.ary, 0, ary, 0, ary.length);
+        this.ary = ary;
     }
 
     public E get(int index) {
@@ -89,24 +115,34 @@ public class MyArrayList<E> implements Iterable<E> {
 
     private class Itr implements Iterator<E> {
 
+        int index = 0;
+        boolean called = false;
+
         // implemement this class
         @Override
         public boolean hasNext() {
             // todo
-
-            return false;
+            return index < size;
         }
 
         @Override
-        public void remove() {
+        public  void remove() {
             // todo
+            if (called || index == 0) {
+                throw new IllegalStateException();
+            }
+            called = true;
         }
 
         @Override
         public E next() {
             // todo
+            called = false;
 
-            return null;
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return ary[index++];
         }
 
     }
