@@ -2,21 +2,14 @@
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- *
- * @author Andrew Sweeris && Trent Fulbright
- * @param <E>
- *
- * A class made to mimic ArrayList, including normal ArrayList functions and
- * iterators.
- */
 public class MyArrayList<E> implements Iterable<E> {
 
+    private final int STARTSIZE = 10;
     private int size;       // the number of elements stored
     E[] ary;                // access modifier is package protected for testing purposes
 
     public MyArrayList() {    // start with a threshold/capacity of 10
-        ary = (E[]) new Object[10];
+        ary = (E[]) new Object[STARTSIZE];
         size = 0;
     }
 
@@ -84,18 +77,18 @@ public class MyArrayList<E> implements Iterable<E> {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
-        for (int i = index; i < ary.length - 1; i++) {
-            ary[i] = ary[i + 1];
-        }
-        if (size-- <= ary.length / 4) {
+        if (size-- <= ary.length / 4 && size >= STARTSIZE) {
             reduce();
+        }
+        for (int i = index; i < size; i++) {
+            ary[i] = ary[i + 1];
         }
         return item;
     }
 
     private void reduce() {
         E[] ary = (E[]) new Object[this.ary.length / 2];
-        for (int i = 0; i < ary.length; i++) {
+        for (int i = 0; i < size; i++) {
             ary[i] = this.ary[i];
         }
         this.ary = ary;
@@ -139,12 +132,18 @@ public class MyArrayList<E> implements Iterable<E> {
                 throw new IllegalStateException();
             }
             called = true;
-            if (size-- <= ary.length / 4) {
+
+            if (size-- <= ary.length / 4 && size >= STARTSIZE) {
                 reduce();
             }
-            for (int i = index; i < ary.length - 1; i++) {
-                ary[i] = ary[i + 1];
+            E[] temp = (E[]) new Object[ary.length];
+            for (int i = index - 1; i < size; i++) {
+                temp[i] = ary[i + 1];
             }
+            for (int i = index - 1; i < ary.length; i++) {
+                ary[i] = temp[i];
+            }
+            index--;
         }
 
         @Override
