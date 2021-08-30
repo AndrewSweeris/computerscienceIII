@@ -2,6 +2,14 @@
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ *
+ * @author Andrew Sweeris && Trent Fulbright
+ * @param <E>
+ *
+ * A class made to mimic ArrayList, including normal ArrayList functions and
+ * iterators.
+ */
 public class MyArrayList<E> implements Iterable<E> {
 
     private int size;       // the number of elements stored
@@ -60,7 +68,9 @@ public class MyArrayList<E> implements Iterable<E> {
 
     private void expand() {
         E[] ary = (E[]) new Object[this.ary.length * 2];
-        System.arraycopy(this.ary, 0, ary, 0, this.ary.length);
+        for (int i = 0; i < size; i++) {
+            ary[i] = this.ary[i];
+        }
         this.ary = ary;
     }
 
@@ -74,23 +84,20 @@ public class MyArrayList<E> implements Iterable<E> {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
+        for (int i = index; i < ary.length - 1; i++) {
+            ary[i] = ary[i + 1];
+        }
         if (size-- <= ary.length / 4) {
             reduce();
         }
-        E[] ary = (E[]) new Object[this.ary.length];
-        for (int i = 0; i < index; i++) {
-            ary[i] = this.ary[i];
-        }
-        for (int i = index; i < ary.length - 1; i++) {
-            ary[i] = this.ary[i + 1];
-        }
-        this.ary = ary;
         return item;
     }
 
     private void reduce() {
         E[] ary = (E[]) new Object[this.ary.length / 2];
-        System.arraycopy(this.ary, 0, ary, 0, ary.length);
+        for (int i = 0; i < ary.length; i++) {
+            ary[i] = this.ary[i];
+        }
         this.ary = ary;
     }
 
@@ -126,12 +133,18 @@ public class MyArrayList<E> implements Iterable<E> {
         }
 
         @Override
-        public  void remove() {
+        public void remove() {
             // todo
             if (called || index == 0) {
                 throw new IllegalStateException();
             }
             called = true;
+            if (size-- <= ary.length / 4) {
+                reduce();
+            }
+            for (int i = index; i < ary.length - 1; i++) {
+                ary[i] = ary[i + 1];
+            }
         }
 
         @Override
