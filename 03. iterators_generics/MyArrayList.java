@@ -1,4 +1,5 @@
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -40,7 +41,7 @@ public class MyArrayList<E> implements Iterable<E> {
         if (item == null) {
             throw new java.util.NoSuchElementException();
         }
-        if (index >= size || index < 0) {
+        if (index > size || index < 0) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -77,9 +78,10 @@ public class MyArrayList<E> implements Iterable<E> {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
-        if (size-- <= ary.length / 4 && size >= STARTSIZE) {
+        if (size <= ary.length / 4 && size >= STARTSIZE / 2) {
             reduce();
         }
+        size--;
         for (int i = index; i < size; i++) {
             ary[i] = ary[i + 1];
         }
@@ -87,11 +89,11 @@ public class MyArrayList<E> implements Iterable<E> {
     }
 
     private void reduce() {
-        E[] ary = (E[]) new Object[this.ary.length / 2];
-        for (int i = 0; i < size; i++) {
-            ary[i] = this.ary[i];
+        E[] temp = (E[]) new Object[ary.length / 2];
+        for (int i = 0; i < temp.length; i++) {
+            temp[i] = this.ary[i];
         }
-        this.ary = ary;
+        this.ary = temp;
     }
 
     public E get(int index) {
@@ -133,7 +135,7 @@ public class MyArrayList<E> implements Iterable<E> {
             }
             called = true;
 
-            if (size-- <= ary.length / 4 && size >= STARTSIZE) {
+            if (size-- <= ary.length / 4 && size > STARTSIZE / 2) {
                 reduce();
             }
             E[] temp = (E[]) new Object[ary.length];
@@ -143,6 +145,7 @@ public class MyArrayList<E> implements Iterable<E> {
             for (int i = index - 1; i < ary.length; i++) {
                 ary[i] = temp[i];
             }
+            ary[size] = null;
             index--;
         }
 
@@ -252,5 +255,268 @@ public class MyArrayList<E> implements Iterable<E> {
         }
         stop = System.currentTimeMillis();
         System.out.println("Java's ArrayList: " + (stop - start) / 1000.0);
+
+        // Our test cases
+        MyArrayList tester = new MyArrayList();
+        Iterator<String> iterator = tester.iterator();
+        double num = 0, count = 0;
+        String result;
+
+        System.out.println("\n===OUR TEST CASES===");
+
+        result = tester.isEmpty() ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("Setup Test: " + result);
+
+        result = tester.isEmpty() ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("\nisEmpty() Test ONE: " + result);
+        tester.add("Hello");
+        result = !tester.isEmpty() ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("isEmpty() Test TWO: " + result);
+        tester.remove(0);
+        result = tester.isEmpty() ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("isEmpty() Test THREE: " + result + "\n");
+
+        result = tester.size() == 0 ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("size() Test ONE: " + result);
+        tester.add("Hey");
+        result = tester.size() == 1 ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("size() Test TWO: " + result);
+
+        tester.clear();
+
+        tester.add("Hello");
+        result = tester.get(0).equals("Hello") ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("\nadd(E item) Test ONE: " + result);
+        tester.add("World");
+        result = tester.get(1).equals("World") ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("add(E item) Test TWO: " + result);
+
+        tester.add("It's", 0);
+        result = tester.get(0).equals("It's") && tester.size() == 3 ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("\nadd(E item, int index) Test ONE: " + result);
+        tester.add("Me", 1);
+        result = tester.get(1).equals("Me") && tester.size() == 4 ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("add(E item, int index) Test TWO: " + result);
+        result = "FAIL";
+        count++;
+        try {
+            tester.add("", -1);
+        } catch (Exception e) {
+            result = "PASS";
+            num++;
+        }
+        System.out.println("add(E item, int index) Test THREE: " + result);
+        result = "FAIL";
+        count++;
+        try {
+            tester.add("", 32);
+        } catch (Exception e) {
+            result = "PASS";
+            num++;
+        }
+        System.out.println("add(E item, int index) Test FOUR: " + result);
+
+        tester.clear();
+        result = "PASS";
+        count++;
+        num++;
+        try {
+            for (int i = 0; i < 1000; i++) {
+                tester.add("" + i);
+            }
+        } catch (Exception e) {
+            result = "FAIL";
+            num--;
+        }
+        System.out.println("\nexpand() Test: " + result);
+
+        tester.clear();
+
+        tester.add("Hello");
+        tester.add("It's");
+        tester.add("Me");
+        String cat = (String) tester.remove(2);
+        result = tester.size() == 2 && cat.equals("Me") ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("\nremove(int index) Test ONE: " + result);
+        cat = (String) tester.remove(0);
+        result = tester.size() == 1 && cat.equals("Hello") ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("remove(int index) Test TWO: " + result);
+        cat = (String) tester.remove(0);
+        result = tester.size() == 0 && cat.equals("It's") ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("remove(int index) Test THREE: " + result);
+        result = "FAIL";
+        count++;
+        try {
+            tester.remove(-32);
+        } catch (Exception e) {
+            result = "PASS";
+            num++;
+        }
+        System.out.println("remove(int index) Test FOUR: " + result);
+        result = "FAIL";
+        count++;
+        try {
+            tester.remove(32);
+        } catch (Exception e) {
+            result = "PASS";
+            num++;
+        }
+        System.out.println("remove(int index) Test FIVE: " + result);
+
+        for (int i = 0; i <= 40; i++) {
+            tester.add("");
+        }
+        while (tester.size() >= 5) {
+            tester.remove(0);
+        }
+        result = tester.ary.length <= 10 ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("\nreduce() Test: " + result);
+
+        result = "FAIL";
+        count++;
+        try {
+            tester.get(-32);
+        } catch (Exception e) {
+            result = "PASS";
+            num++;
+        }
+        System.out.println("\nget(int index) Test ONE: " + result);
+
+        result = "FAIL";
+        count++;
+        try {
+            tester.remove(32);
+        } catch (Exception e) {
+            result = "PASS";
+            num++;
+        }
+        System.out.println("get(int index) Test TWO: " + result);
+
+        tester.clear();
+        result = !iterator.hasNext() ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("\nhasNext() Test ONE: " + result);
+        tester.add("");
+        result = iterator.hasNext() ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("hasNext Test TWO: " + result);
+
+        tester.clear();
+        tester.add("");
+        tester.add("");
+
+        result = "FAIL";
+        count++;
+        try {
+            iterator.remove();
+        } catch (Exception e) {
+            result = "PASS";
+            num++;
+        }
+        System.out.println("\nremove() Test ONE: " + result);
+        iterator.next();
+        iterator.remove();
+        result = tester.size() == 1 ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("remove() Test TWO: " + result);
+
+        cat = iterator.next();
+        result = cat.equals("") ? "PASS" : "FAIL";
+        count++;
+        if ("PASS".equals(result)) {
+            num++;
+        }
+        System.out.println("\nnext() Test ONE: " + result);
+        result = "FAIL";
+        count++;
+        try {
+            iterator.next();
+        } catch (Exception e) {
+            result = "PASS";
+            num++;
+        }
+        System.out.println("next() Test TWO: " + result);
+
+        String grade;
+        double tot = num / count * 100;
+        if (tot == 100) {
+            grade = "Perfect";
+        } else if (tot >= 90) {
+            grade = "A - " + (int) tot;
+        } else if (tot >= 80) {
+            grade = "B - " + (int) tot;
+        } else if (tot >= 70) {
+            grade = "C - " + (int) tot;
+        } else if (tot >= 60) {
+            grade = "D - " + (int) tot;
+        } else {
+            grade = "F - " + (int) tot;
+        }
+        System.out.println("\nResult: " + grade);
     }
 }
