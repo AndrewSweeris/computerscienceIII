@@ -160,6 +160,7 @@ public class Fractal extends JFrame {
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
+            g.setColor(new Color((int) (Math.random() * 200), (int) (Math.random() * 200), (int) (Math.random() * 200)));
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             // add code here and call helper methods
@@ -170,7 +171,7 @@ public class Fractal extends JFrame {
                 drawSierpenskiCarpet(level, 150, 150, 400, g);
             }
             if (SierpenskiTriangleActive) {
-                drawSierpenskiTriangle(level, 350, 350, 300, g);;
+                drawSierpenskiTriangle(level, 350, 350, 450, g);;
             }
             if (OvalTreeActive) {
                 drawOvalTree(level, 350, 150, 500, g);
