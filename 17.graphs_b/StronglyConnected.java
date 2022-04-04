@@ -4,7 +4,6 @@ public class StronglyConnected {
     private static HashSet<Integer> visited;
     private static ArrayList<ArrayList<Integer>> SCCs;
     private static ArrayList<ArrayList<Integer>> newAdj;
-    private static int curr;
 
     static int numberOfStronglyConnectedComponents(ArrayList<Integer>[] adj) {
         //write your code here
@@ -14,36 +13,38 @@ public class StronglyConnected {
         for (int i = 0; i < adj.length; i++)newAdj.add(new ArrayList<>());
 
         ArrayList<Integer> order = Toposort.toposort(adj);
-        transpose(adj,order.get(0),null);
+        transpose(adj,order.get(0));
+        System.out.println(order.toString()+ "\n");
         visited.clear();
-        curr = 0;
         for (int i = 0; i < newAdj.size(); i++) {
             int x = order.get(i);
             if (!visited.contains(x)) {
                 SCCs.add(new ArrayList<>());
                 DFSDive(x);
-                curr++;
             }
+        }
+        Iterator<ArrayList<Integer>> it = newAdj.iterator();
+        int i = 0;
+        while (it.hasNext()) {
+            System.out.println(i++ + " " + it.next().toString());
         }
         return SCCs.size();
     }
 
     // Reverses arrows
-    static void transpose(ArrayList<Integer>[] adj, Integer current, Integer previous) {
-        if (previous!=null) {
-            newAdj.get(current).add(previous);
-        }
+    static void transpose(ArrayList<Integer>[] adj, Integer current) {
         visited.add(current);
         for (Integer x : adj[current]) {
+            newAdj.get(x).add(current);
             if (!visited.contains(x)) {
-            transpose(adj,x,current);}
+            transpose(adj,x);}
         }
     }
 
     // diver for KaijuSort
     static void DFSDive(Integer vertex) {
         visited.add(vertex);
-        SCCs.get(curr).add(vertex);
+        SCCs.get(SCCs.size()-1).add(vertex);
         Iterator<Integer> it = newAdj.get(vertex).iterator();
         while (it.hasNext()) {
             int x = it.next();
