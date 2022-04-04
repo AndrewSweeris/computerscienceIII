@@ -24,7 +24,9 @@ public class Toposort {
 
     static void DFS(int vertex) {
         ary[vertex]=true;
-        for (int x : graph[vertex]) {
+        Iterator<Integer> it = graph[vertex].iterator();
+        while (it.hasNext()) {
+            int x = it.next();
             if (!ary[x]) {
                 DFS(x);
             }

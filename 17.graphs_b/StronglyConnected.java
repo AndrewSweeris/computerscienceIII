@@ -2,66 +2,52 @@ import java.util.*;
 
 public class StronglyConnected {
     private static HashSet<Integer> visited;
-    private static ArrayList<Integer>[] SCCs;
-    private static Stack<Integer> stack;
-    private static ArrayList<Integer>[] graph;
-    static private int curr;
+    private static ArrayList<ArrayList<Integer>> SCCs;
+    private static ArrayList<ArrayList<Integer>> newAdj;
+    private static int curr;
 
     static int numberOfStronglyConnectedComponents(ArrayList<Integer>[] adj) {
         //write your code here
         visited = new HashSet<>();
-        graph=adj;
-        SCCs = (ArrayList<Integer>[]) new ArrayList[adj.length];
+        SCCs = new ArrayList<ArrayList<Integer>>();
+        newAdj = new ArrayList<ArrayList<Integer>>();
+        for (int i = 0; i < adj.length; i++)newAdj.add(new ArrayList<>());
 
-        curr = 0;
-        ArrayList<Integer> order = toposort(adj);
-        curr = 0;
+        ArrayList<Integer> order = Toposort.toposort(adj);
+        transpose(adj,order.get(0),null);
         visited.clear();
-        for (int i = order.size()-1; i >= 0; i--) {
+        curr = 0;
+        for (int i = 0; i < newAdj.size(); i++) {
             int x = order.get(i);
             if (!visited.contains(x)) {
+                SCCs.add(new ArrayList<>());
                 DFSDive(x);
                 curr++;
             }
         }
-        return SCCs.length;
+        return SCCs.size();
     }
 
-    static ArrayList<Integer> toposort(ArrayList<Integer>[] adj) {
-        stack = new Stack<>();
-        for (int i = 0; i < adj.length; i++) {
-            if (!visited.contains(i)) {
-                curr = 1;
-                DFS(adj, i);
-            }
+    // Reverses arrows
+    static void transpose(ArrayList<Integer>[] adj, Integer current, Integer previous) {
+        if (previous!=null) {
+            newAdj.get(current).add(previous);
         }
-        ArrayList<Integer> output = new ArrayList<>();
-        while (!stack.isEmpty()) {
-            output.add(stack.pop());
-        }
-        return output;
-    }
-
-    // DFS method for toposort
-    static void DFS(ArrayList<Integer>[] adj, int vertex) {
-        visited.add(vertex);
-        curr = vertex;
-
-        for (int x : adj[vertex]) {
+        visited.add(current);
+        for (Integer x : adj[current]) {
             if (!visited.contains(x)) {
-                graph[x].add(curr);
-                DFS(adj, x);
-            }
+            transpose(adj,x,current);}
         }
-        stack.push(vertex);
     }
 
-    // DFS method for SCCs
-    static void DFSDive(int vertex) {
+    // diver for KaijuSort
+    static void DFSDive(Integer vertex) {
         visited.add(vertex);
-        SCCs[curr].add(vertex);
-        for (Integer x : graph[vertex]) {
-            if (x!=null&&!visited.contains(x)) {
+        SCCs.get(curr).add(vertex);
+        Iterator<Integer> it = newAdj.get(vertex).iterator();
+        while (it.hasNext()) {
+            int x = it.next();
+            if (!visited.contains(x)) {
                 DFSDive(x);
             }
         }
