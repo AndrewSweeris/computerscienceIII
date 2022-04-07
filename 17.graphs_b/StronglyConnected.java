@@ -14,7 +14,7 @@ public class StronglyConnected {
 
         ArrayList<Integer> order = Toposort.toposort(adj);
         transpose(adj,order.get(0));
-        System.out.println(order.toString()+ "\n");
+        // System.out.println(order.toString()+ "\n");
         visited.clear();
         for (int i = 0; i < newAdj.size(); i++) {
             int x = order.get(i);
@@ -23,11 +23,11 @@ public class StronglyConnected {
                 DFSDive(x);
             }
         }
-        Iterator<ArrayList<Integer>> it = newAdj.iterator();
-        int i = 0;
-        while (it.hasNext()) {
-            System.out.println(i++ + " " + it.next().toString());
-        }
+        // Iterator<ArrayList<Integer>> it = newAdj.iterator();
+        // int i = 0;
+        // while (it.hasNext()) {
+        //     System.out.println(i++ + " " + it.next().toString());
+        // }
         return SCCs.size();
     }
 
