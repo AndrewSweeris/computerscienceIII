@@ -12,6 +12,7 @@ public class MazeGenerator extends JFrame {
     int row = 0, col = 0, endRow = cell.length - 1, endCol = cell[endRow].length - 1;
     int mazeType = 0;
     private JPanel grid, data;
+    private boolean anti = false;
     public MazeGenerator() {
         initGUI();
         genMaze();
@@ -45,6 +46,8 @@ public class MazeGenerator extends JFrame {
                 break;
             case 3: // anti-maze
             case 4: //
+		aldousBroder();
+		break;
             case 5: // anti-maze
             case 6: //
             case 7: // anti-maze
@@ -93,7 +96,12 @@ public class MazeGenerator extends JFrame {
         cell = new Cell[endRow+1][endCol+1];
         for (int y = 0; y < endCol+1; y++) {
             for (int x = 0; x < endRow+1; x++) {
-                cell[x][y] = new Cell(x, y);
+		    if (!anti) {
+                	cell[x][y] = new Cell(x, y);
+		    }
+		    else {
+			    cell[x][y]=new Cell(x,y,true);
+		    }
                 grid.add(cell[x][y]);
             }
         }
@@ -135,7 +143,7 @@ public class MazeGenerator extends JFrame {
     private void openOptionsPane() {
         JDialog menu = new JDialog();
         menu.setSize(400, 1400);
-        menu.setLayout(new GridLayout(3, 1));
+        menu.setLayout(new GridLayout(4, 1));
         menu.setResizable(false);
 
         JPanel rows = new JPanel();
@@ -146,8 +154,7 @@ public class MazeGenerator extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
                 String text = rowField.getText();
-                System.out.println(text);
-                endRow = (int)(Integer.parseInt(text));
+                endRow = (int)(Integer.parseInt(text))-1;
             }
         });
         rows.add(rowField);
@@ -160,8 +167,7 @@ public class MazeGenerator extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
                 String text = colField.getText();
-                System.out.println(text);
-                endCol = (int)(Integer.parseInt(text));
+                endCol = (int)(Integer.parseInt(text))-1;
             }
         });
         cols.add(colField);
@@ -182,14 +188,14 @@ public class MazeGenerator extends JFrame {
                 mazeType = 2;
             }
         });
-        /*
-        JRadioButton three = new JRadioButton("Three");
+        JRadioButton three = new JRadioButton("Aldous-Broder");
         three.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 mazeType = 4;
             }
         });
+	/*
         JRadioButton four = new JRadioButton("Four");
         four.addActionListener(new ActionListener() {
             @Override
@@ -200,10 +206,29 @@ public class MazeGenerator extends JFrame {
          */
         mazes.add(one);
         mazes.add(two);
-        /*
         mazes.add(three);
+		/*;
         mazes.add(four);
          */
+
+	JPanel radioButtonsAnti = new JPanel();
+	ButtonGroup antiM = new ButtonGroup();
+	JRadioButton not = new JRadioButton("Normal Maze");
+	not.addActionListener(new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			anti = false;
+		}
+	});
+	JRadioButton tr = new JRadioButton("Anti-Maze");
+	tr.addActionListener(new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			anti = true;
+		}
+	});
+	antiM.add(not);
+	antiM.add(tr);
 
         switch (mazeType) {
             case 0:
@@ -211,25 +236,38 @@ public class MazeGenerator extends JFrame {
             case 2:
             case 3: mazes.setSelected(two.getModel(), true); break;
             case 4:
-                /*
             case 5: mazes.setSelected(three.getModel(), true); break;
+		    /*
             case 6:
             case 7: mazes.setSelected(four.getModel(), true); break;
                  */
         }
 
         radioButtonsType.setLayout(new GridLayout(5, 1));
-        radioButtonsType.add(new JLabel("Maze Type"));
+        radioButtonsType.add(new JLabel("Maze Generation - Type"));
         radioButtonsType.add(one);
         radioButtonsType.add(two);
-        /*
         radioButtonsType.add(three);
+	/*
         radioButtonsType.add(four);
          */
+
+	radioButtonsAnti.setLayout(new GridLayout(3, 1));
+	radioButtonsAnti.add(new JLabel("Anti-Maze/Normal Maze"));
+	radioButtonsAnti.add(not);
+	radioButtonsAnti.add(tr);
+
+	if (anti) {
+		antiM.setSelected(tr.getModel(), true);
+	}
+	else {
+		antiM.setSelected(not.getModel(), true);
+	}
 
         menu.add(rows);
         menu.add(cols);
         menu.add(radioButtonsType);
+	menu.add(radioButtonsAnti);
         menu.pack();
 
         menu.setVisible(true);
@@ -321,7 +359,12 @@ public class MazeGenerator extends JFrame {
         cell = new Cell[endRow+1][endCol+1];
         for (int y = 0; y < endCol+1; y++) {
             for (int x = 0; x < endRow+1; x++) {
-                cell[x][y] = new Cell(x, y);
+		    if (!anti) {
+                	cell[x][y] = new Cell(x, y);
+		    }
+		    else {
+			    cell[x][y] = new Cell(x,y,true);
+		    }
                 cell[x][y].SIZEV = 400 / (endRow+1);
                 cell[x][y].SIZEH = 400 / (endCol+1);
                 grid.add(cell[x][y]);
@@ -364,7 +407,7 @@ public class MazeGenerator extends JFrame {
         col = 0;
         Stack<Point> stack = new Stack<>();
         LinkedList<Point> list = new LinkedList<>();
-        stack.add(new Point((int) (Math.random() * cell.length), (int) (Math.random() * cell.length)));
+        stack.add(new Point((int) (Math.random() * cell.length), (int) (Math.random() * cell[0].length)));
 
         while (!stack.isEmpty()) {
             list.clear();
@@ -401,14 +444,14 @@ public class MazeGenerator extends JFrame {
             list.clear();
             Point current = avail.remove((int)(Math.random()*avail.size()));
 
-            if (inBounds(current.x - 1, current.y) && isAvailable(current.x - 1, current.y))
-                list.add(new Point(current.x - 1, current.y));
-            if (inBounds(current.x + 1, current.y) && isAvailable(current.x + 1, current.y))
-                list.add(new Point(current.x + 1, current.y));
-            if (inBounds(current.x, current.y - 1) && isAvailable(current.x, current.y - 1))
-                list.add(new Point(current.x, current.y - 1));
-            if (inBounds(current.x, current.y + 1) && isAvailable(current.x, current.y + 1))
-                list.add(new Point(current.x, current.y + 1));
+           if (inBounds(current.x-1,current.y) && isAvailable(current.x -1, current.y))
+		   list.add(new Point(current.x-1,current.y));
+	   if (inBounds(current.x+1,current.y) && isAvailable(current.x+1,current.y))
+		   list.add(new Point(current.x+1,current.y));
+	   if (inBounds(current.x,current.y-1) && isAvailable(current.x,current.y-1))
+		   list.add(new Point(current.x,current.y-1));
+	   if (inBounds(current.x,current.y+1) && isAvailable(current.x,current.y+1))
+		   list.add(new Point(current.x,current.y+1));
 
             if (list.size() > 0) {
                 int index = (int) (Math.random() * list.size());
@@ -420,6 +463,32 @@ public class MazeGenerator extends JFrame {
                 avail.add(p);
             }
         }
+    }
+
+    private void aldousBroder() {
+	    HashSet<Point> visited = new HashSet<>();
+	    LinkedList<Point> list = new LinkedList<>();
+	    LinkedList<Point> linker = new LinkedList<>();
+	    Point c = new Point((int)(Math.random()*cell.length),(int)(Math.random()*cell[0].length));
+	    while(visited.size()<cell.length*cell[0].length) {
+		    visited.add(c);
+		    list.clear();
+	    if (inBounds(c.x-1,c.y))
+		    list.add(new Point(c.x-1,c.y));
+	    if (inBounds(c.x+1,c.y))
+		    list.add(new Point(c.x+1,c.y));
+	    if (inBounds(c.x,c.y-1))
+		    list.add(new Point(c.x,c.y-1));
+	    if (inBounds(c.x,c.y+1))
+		    list.add(new Point(c.x,c.y+1));
+	    if (list.size()>0) {
+		    Point p = list.get((int)(Math.random()*list.size()));
+		    if (isAvailable(p.x,p.y)) {
+		    cell[c.x][c.y].openTo(cell[p.x][p.y]);
+		    }
+		    c = p;
+	    }
+	    }
     }
 
     HashMap<Point, Point> parentMap;
@@ -505,6 +574,7 @@ class Cell extends JPanel {
     public static int SIZEH = 20;
     public final int X;
     public final int Y;
+    private static boolean anti;
     boolean[] wall = {true, true, true, true};
     private boolean[] path = {false, false, false, false};
     private boolean current, end;
@@ -515,6 +585,15 @@ class Cell extends JPanel {
         this.Y = Y;
         current = false;
         end = false;
+	anti = false;
+    }
+
+    public Cell(int X, int Y, boolean anti) {
+	    this.X = X;
+	    this.Y = Y;
+	    current = false;
+	    end = false;
+	    this.anti=anti;
     }
 
     public boolean isCurrent() {
@@ -539,10 +618,10 @@ class Cell extends JPanel {
         g.fillRect(0, 0, SIZEH, SIZEV);
         g.setColor(Color.BLACK);
         // draws top wall
-        if (wall[TOP])
+        if ((wall[TOP]&&!anti)||(!wall[TOP]&&anti))
             g.drawLine(0, 0, SIZEV, 0);
         // draws left wall
-        if (wall[LEFT])
+        if ((wall[LEFT]&&!anti)||(!wall[LEFT]&&anti))
             g.drawLine(0, 0, 0, SIZEH);
         g.setColor(Color.GREEN);
         if (path[TOP]) {
